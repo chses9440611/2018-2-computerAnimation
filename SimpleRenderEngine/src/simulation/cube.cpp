@@ -217,7 +217,7 @@ namespace simulation
 
 	void Cube::InitializeSpring()
 	{
-		// TODO
+		// TODO ---> OK
 
 		// following is just an example for connecting a part of the struct strings.
 		int iParticleID = 0;
