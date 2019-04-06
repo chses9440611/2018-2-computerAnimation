@@ -246,9 +246,21 @@ namespace simulation
 					{
 						if (structFlag == Z_id)
 						{
-							//connect spring along z-direction
+							//connect spring along z-direction 0->1->...->9; 10->11->...->19;...; 100->101->...->109;
 							iParticleID = i * particleNumPerFace + j * particleNumPerEdge + k;
 							iNeighborID = i * particleNumPerFace + j * particleNumPerEdge + k + 1;
+						}
+						else if (structFlag == Y_id)
+						{
+							// connect spring along y-direction 0->10->...->90; 1->11->...->91;...; 100->110->...->190;
+							iParticleID = i * particleNumPerFace + j + k * particleNumPerEdge;
+							iNeighborID = i * particleNumPerFace + j + (k + 1) * particleNumPerEdge;
+						}
+						else
+						{
+							// connect spring along x-direction 0->100->...->900; 1->101->...->901; ... ; 10->110->...->910;
+							iParticleID = i * particleNumPerEdge + j + k * particleNumPerFace;
+							iNeighborID = i * particleNumPerEdge + j + (k + 1) * particleNumPerFace;
 						}
 						SpringStartPos = particles[iParticleID].Position();
 						SpringEndPos = particles[iNeighborID].Position();
@@ -259,7 +271,7 @@ namespace simulation
 							Length.norm(),
 							springCoefStruct,
 							damperCoefStruct,
-							// make sure that the type is correct!
+							// make sure that the type is STRUCT!
 							Spring::SpringType::STRUCT);
 						// push into the container
 						springs.push_back(SpringStruct);
@@ -268,6 +280,132 @@ namespace simulation
 			}
 			structFlag--;
 		}
+
+		structFlag = Z_id;
+		while(structFlag)
+		{
+			for(int i = 0; i < particleNumPerEdge; i++)
+			{
+				for(int j = 0; j < particleNumPerEdge; j++)
+				{
+					for(int k = 0; k < particleNumPerEdge; k++)
+					{
+
+						// (j,k) -> (j+1,k+1)
+						if(j< particleNumPerEdge-1 && k < particleNumPerEdge-1)
+						{
+							if (structFlag == Z_id) // x-y plane
+							{
+								iParticleID = i + j * particleNumPerFace + k * particleNumPerEdge;
+								iNeighborID = i + (j + 1) * particleNumPerFace + (k + 1) * particleNumPerEdge;
+							}
+							else if (structFlag == Y_id) // xz-plane
+							{
+								iParticleID = i * particleNumPerEdge+ j * particleNumPerFace + k;
+								iNeighborID = i * particleNumPerEdge+ (j + 1) * particleNumPerFace + k + 1;
+							}
+							else // yz-plane
+							{
+								iParticleID = i * particleNumPerFace + j * particleNumPerEdge + k;
+								iNeighborID = i * particleNumPerFace + (j + 1) * particleNumPerEdge + k + 1;								
+							}
+							SpringStartPos = particles[iParticleID].Position();
+							SpringEndPos = particles[iNeighborID].Position();
+							Length = SpringStartPos - SpringEndPos;
+							Spring SpringStruct(
+								iParticleID,
+								iNeighborID,
+								Length.norm(),
+								springCoefStruct,
+								damperCoefStruct,
+								// make sure that the type is SHEAR!
+								Spring::SpringType::SHEAR);
+							// push into the container
+							springs.push_back(SpringStruct);
+						}
+
+						// (j, k) -> (j+1, k-1)
+						if(j < particleNumPerEdge - 1 && k >=1){
+							if (structFlag == Z_id) // x-y plane
+							{
+								iParticleID = i + j * particleNumPerFace + k * particleNumPerEdge;
+								iNeighborID = i + (j + 1) * particleNumPerFace + (k - 1) * particleNumPerEdge;
+							}
+							else if (structFlag == Y_id) // xz-plane
+							{
+								iParticleID = i * particleNumPerEdge+ j * particleNumPerFace + k;
+								iNeighborID = i * particleNumPerEdge+ (j + 1) * particleNumPerFace + k - 1;
+							}
+							else // yz-plane
+							{
+								iParticleID = i * particleNumPerFace + j * particleNumPerEdge + k;
+								iNeighborID = i * particleNumPerFace + (j + 1) * particleNumPerEdge + k - 1;								
+							}
+							SpringStartPos = particles[iParticleID].Position();
+							SpringEndPos = particles[iNeighborID].Position();
+							Length = SpringStartPos - SpringEndPos;
+							Spring SpringStruct(
+								iParticleID,
+								iNeighborID,
+								Length.norm(),
+								springCoefStruct,
+								damperCoefStruct,
+								// make sure that the type is SHEAR!
+								Spring::SpringType::SHEAR);
+							// push into the container
+							springs.push_back(SpringStruct);
+						}
+						
+					}
+				}
+			}
+			structFlag--;
+		}
+
+		structFlag = Z_id;
+		while(structFlag)
+		{
+			for(int i = 0; i < particleNumPerEdge; i++)
+			{
+				for(int j = 0; j < particleNumPerEdge; j++)
+				{
+					for(int k = 0; k < particleNumPerEdge - 2; k++)
+					{
+						// along Z-axis
+						if (structFlag == Z_id) // along Z-axis
+						{
+							iParticleID = i * particleNumPerFace + j * particleNumPerEdge + k;
+							iNeighborID = i * particleNumPerFace + j * particleNumPerEdge + k + 2;
+						}
+						else if (structFlag == Y_id) // along Y-axis
+						{
+							iParticleID = i * particleNumPerFace + j + k * particleNumPerEdge;
+							iNeighborID = i * particleNumPerFace + j + (k + 2) * particleNumPerEdge;
+						}
+						else
+						{
+							iParticleID = i + j * particleNumPerEdge + k * particleNumPerFace;
+							iNeighborID = i + j * particleNumPerEdge + (k + 2) * particleNumPerFace;
+						}
+						SpringStartPos = particles[iParticleID].Position();
+						SpringEndPos = particles[iNeighborID].Position();
+						Length = SpringStartPos - SpringEndPos;
+						Spring SpringStruct(
+							iParticleID,
+							iNeighborID,
+							Length.norm(),
+							springCoefStruct,
+							damperCoefStruct,
+							// make sure that the type is BENDING!
+							Spring::SpringType::BENDING);
+						// push into the container
+						springs.push_back(SpringStruct);
+					}
+				}
+			}
+			structFlag--;
+		}
+
 	}
 
 	void Cube::UpdateSpringCoef(const double a_cdSpringCoef, const Spring::SpringType a_cSpringType)
