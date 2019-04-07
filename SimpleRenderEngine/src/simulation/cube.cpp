@@ -181,8 +181,13 @@ namespace simulation
 		const double springCoef, const double restLength)
 	{
 		// TODO
+		Eigen::Vector3d Force = (positionA - posirionB) / (positionA - positionB).norm();
 
-		return Eigen::Vector3d::Zero();
+		double force_value;
+		force_value = springCoef * ((positionA - positionB).norm() - restLength);
+		Force = - Force * force_value;
+		return force;
+		//return Eigen::Vector3d::Zero();
 	}
 
 	Eigen::Vector3d Cube::ComputeDamperForce(const Eigen::Vector3d &positionA, const Eigen::Vector3d &positionB,
@@ -190,8 +195,14 @@ namespace simulation
 		const double damperCoef)
 	{
 		// TODO
-
-		return Eigen::Vector3d::Zero();
+		double force_value;
+		double length_x = (positionA - positionB).norm();
+		Eigen::Vector3d DamperForce = (positionA - positionB) / length_x;
+		Eigen::Vector3d deltaVelocity = velocityA - velocityB;
+		 
+		force_value = damperCoef * DamperForce.dot(deltaVelocity);
+		DamperForce = - DamperForce * force_value;
+		return Eigen::Vector3d::Zero();	
 	}
 
 	void Cube::InitializeParticle()
